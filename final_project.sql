@@ -1,4 +1,4 @@
-create table CalendarItems
+create table if not exists CalendarItems
 (
     ItemId int auto_increment
         primary key,
@@ -6,7 +6,21 @@ create table CalendarItems
     Date   datetime     null
 );
 
-create table Events
+create table if not exists Users
+(
+    UserId   int auto_increment
+        primary key,
+    Username varchar(20)  not null,
+    Email    varchar(120) not null,
+    Password varchar(60)  not null,
+    Deleted  datetime     null,
+    constraint unique_email
+        unique (Email),
+    constraint unique_username
+        unique (Username)
+);
+
+create table if not exists Events
 (
     EventId      int auto_increment
         primary key,
@@ -25,7 +39,7 @@ create index CalendarItem
 create index Creator
     on Events (Creator);
 
-create table Lists
+create table if not exists Lists
 (
     ListId       int auto_increment
         primary key,
@@ -45,7 +59,7 @@ create index CalendarItem
 create index Creator
     on Lists (Creator);
 
-create table Tasks
+create table if not exists Tasks
 (
     TaskId       int auto_increment
         primary key,
@@ -66,16 +80,47 @@ create index CalendarItem
 create index List
     on Tasks (List);
 
-create table Users
-(
-    UserId   int auto_increment
-        primary key,
-    Username varchar(20)  not null,
-    Email    varchar(120) not null,
-    Password varchar(60)  not null,
-    Deleted  datetime     null,
-    constraint unique_email
-        unique (Email),
-    constraint unique_username
-        unique (Username)
-);
+create
+    definer = aimee@`%` procedure CreateEvent(IN title varchar(120), IN event_time datetime, IN user_id int)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+
+    START TRANSACTION;
+    INSERT INTO CalendarItems(Title, Date) VALUES (title, event_time);
+    INSERT INTO Events(CalendarItem, Creator) VALUES (LAST_INSERT_ID(), user_id);
+    COMMIT;
+END;
+
+create
+    definer = aimee@`%` procedure CreateList(IN list_title varchar(120), IN event_time datetime, IN user_id int)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+
+    START TRANSACTION;
+    INSERT INTO CalendarItems(Title, Date) VALUES (list_title, event_time);
+    INSERT INTO Lists(CalendarItem, Creator) VALUES (LAST_INSERT_ID(), user_id);
+    COMMIT;
+END;
+
+create
+    definer = aimee@`%` procedure CreateTask(IN list_title varchar(120), IN due_date datetime, IN info varchar(500),
+                                             IN list_id int)
+BEGIN
+    DECLARE exit handler for SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+        END;
+
+    START TRANSACTION;
+    INSERT INTO CalendarItems(Title, Date) VALUES (list_title, due_date);
+    INSERT INTO Tasks(CalendarItem, Description, List) VALUES (LAST_INSERT_ID(), info, list_id);
+    COMMIT;
+END;
+
+

@@ -1,3 +1,11 @@
+# Project: Task App (CPSC 408 Final)
+# 
+# Created by Aimee Bowen
+# Student ID: 2277842
+# Email: bowen126@mail.chapman.edu
+# Description: Using FlaskFrom, here is where all forms in the app are defined.
+
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError, DateTimeField
 from wtforms.validators import DataRequired, Length, Email, EqualTo

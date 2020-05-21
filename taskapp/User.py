@@ -1,8 +1,9 @@
+# Project: Task App (CPSC 408 Final)
+# 
 # Created by Aimee Bowen
 # Student ID: 2277842
 # Email: bowen126@mail.chapman.edu
-# Description: Student object class that stores data for name, gpa, major, and adviser.
-# It includes simple GET functions for returning student variables.
+# Description: User class for handling user login and registration. Extends UserMixin.
 
 from flask_login import UserMixin
 

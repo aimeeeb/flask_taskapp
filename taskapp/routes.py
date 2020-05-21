@@ -1,7 +1,14 @@
+# Project: Task App (CPSC 408 Final)
+# 
+# Created by Aimee Bowen
+# Student ID: 2277842
+# Email: bowen126@mail.chapman.edu
+# Description: This file uses flask to generate each page and calls the functions needed per page.
+
+
 from flask import render_template, url_for, flash, redirect, request, abort, send_from_directory
 from taskapp import app, bcrypt, db_connection, db_cursor, datafunctions
 from taskapp.forms import RegistrationForm, LoginForm, ListForm, TaskForm, EventForm
-from taskapp.List import List
 from flask_login import login_user, current_user, logout_user, login_required
 import sys
 
@@ -10,6 +17,7 @@ import sys
 @app.route("/home", methods=['GET', 'POST'])
 @login_required
 def home():
+    # get lists for current user
     posts = datafunctions.get_lists(current_user.get_id())
     return render_template('home.html', posts=posts)
 
@@ -18,11 +26,13 @@ def home():
 def new_task(list_id):
     form = TaskForm()
     if form.validate_on_submit():
+        # if valid inputs, add task to database
         datafunctions.create_task(form.title.data, form.date.data, form.description.data, list_id)
         flash(f'Your task has been created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_task.html', title="New Task", form=form, legend="New Task")
 
+# creating csv for one list
 @app.route("/list/<int:list_id>/csv")
 def create_csv(list_id):
     file_dict = datafunctions.create_list_csv(list_id)
@@ -30,6 +40,7 @@ def create_csv(list_id):
     filename = file_dict["filename"]
     return send_from_directory(dir, filename, as_attachment=True)
 
+# creating csv for all user's lists
 @app.route("/account/csv")
 def create_alltasks_csv():
     file_dict = datafunctions.create_alltasks_csv(current_user.get_id())

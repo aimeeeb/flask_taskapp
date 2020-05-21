@@ -1,13 +1,19 @@
+# Project: Task App (CPSC 408 Final)
+# 
+# Created by Aimee Bowen
+# Student ID: 2277842
+# Email: bowen126@mail.chapman.edu
+# Description: This file includes all database queries for the app.
+
 from taskapp import db_connection, login_manager
 from taskapp.User import User
 import csv
 import os
 import json
-import sys
 
 cursor = db_connection.cursor()
 
-
+# given user ID, return User object
 @login_manager.user_loader
 def load_user(user_id):
     # check if user exists in database
@@ -23,6 +29,7 @@ def load_user(user_id):
 
 
 def create_list(title, date, user_id):
+    # Use CreateList procedure
     cursor.callproc("CreateList", (title, date, user_id,))
     db_connection.commit()
 
@@ -36,6 +43,7 @@ def update_list(title, date, list_id):
     db_connection.commit()
 
 
+# returns an array of list dicts
 def get_lists(user):
     cursor.execute("""
                     SELECT ListId, CI.Title, Complete
@@ -59,7 +67,7 @@ def get_lists(user):
             i += 1
     return lists
 
-
+# returns a single dict of a list
 def get_list(list_id):
     cursor.execute("""
                     SELECT ListId, CI.Title, Complete
@@ -86,10 +94,12 @@ def delete_list(list_id):
 
 
 def create_task(title, date, description, list_id):
+    # use CreateTask procedure
     cursor.callproc("CreateTask", (title, date, description, list_id,))
     db_connection.commit()
 
 
+# returns an array of task dicts
 def get_tasks(list_id):
     cursor.execute("""
                     SELECT TaskId, CI.Title, Description, Complete
@@ -114,25 +124,35 @@ def get_tasks(list_id):
     return tasks
 
 
+# create a CSV of one list
 def create_list_csv(list_id):
+    # get current path
     path = os.getcwd() + "\\"
+    # create filename
     file = str("CSVList" + str(list_id) + ".csv")
     filepath = path + file
+    # get tasks
     tasks = get_tasks(list_id)
+    # write to csv
     fieldnames = list(tasks[0].keys())
     with open(filepath, 'w') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         for task in tasks:
             writer.writerow(task)
+    # returns a dict with the path and filename
     return {'path': path, 'filename': file}
 
 
+# create a CSV with all tasks for a user
 def create_alltasks_csv(user_id):
+    # get current path
     path = os.getcwd() + "\\"
+    # get username for filename
     cursor.execute("SELECT Username FROM Users WHERE UserId = %s", (user_id,))
     username = cursor.fetchone()[0]
     file = str(str(username) + "_alltasks.csv")
     filepath = path + file
+    # join CalendarItems, Lists, and Tasks to get all information
     cursor.execute("""
         SELECT lists.title, CI.Title, Tasks.Description, CI.Date
         FROM Tasks
@@ -143,6 +163,7 @@ def create_alltasks_csv(user_id):
         WHERE lists.Creator = %s
     """, (user_id,))
     results = cursor.fetchall()
+    # write to file
     fieldnames = ["List", "Task", "Description", "Due Date"]
     with open(filepath, 'w') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -155,9 +176,11 @@ def create_alltasks_csv(user_id):
                                  'Due Date': results[i][3]
                                  })
                 i += 1
+    # returns a dict with the path and filename
     return {'path': path, 'filename': file}
 
 
+# returns the number of tasks for a user
 def count_tasks(user_id):
     cursor.execute(""" 
                         SELECT COUNT(TaskId)
@@ -169,6 +192,7 @@ def count_tasks(user_id):
     return result
 
 
+# returns the number of lists for a user
 def count_lists(user_id):
     cursor.execute(""" 
                     SELECT COUNT(ListId) 
@@ -181,9 +205,12 @@ def count_lists(user_id):
 
 
 def create_event(title, event_time, user_id):
+    # use CreateEvent stored protocol
     cursor.callproc("CreateEvent", (title, event_time, user_id,))
     db_connection.commit()
 
+
+# returns array of dicts for all valid CalendarItems
 def get_events(user_id):
     cursor.execute("""
         SELECT *
@@ -209,6 +236,7 @@ def get_events(user_id):
     return events
 
 
+# returns json of all events
 def calendar_json(user_id):
     all_items = []
     events = get_events(user_id)
