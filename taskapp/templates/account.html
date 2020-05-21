@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Account Info</h1>
+    <p>Username: {{ current_user.username }}</p>
+    <p>Email: {{ current_user.email }}</p>
+    <p>You currently have {{ task_count }} tasks in {{ list_count }} lists.</p>
+    <a href="{{ url_for("create_alltasks_csv") }}">Download all tasks as CSV</a>
+{% endblock content %}
