@@ -16,10 +16,10 @@ This is a flask application created to run in local. It includes user login. Use
 
 ## Modules used
 
-**flask**
-**flask_login**
-**flask_bcrypt**
-**mysql.connector**
+- **flask**
+- **flask_login**
+- **flask_bcrypt**
+- **mysql.connector**
 
 ## Sources used
 
