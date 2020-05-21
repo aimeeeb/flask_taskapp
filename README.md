@@ -1,8 +1,11 @@
 # Task App
+
 Created by Aimee Bowen
+
 Email: bowen126@mail.chapman.edu
 
 ### Description
+
 This is a flask application created to run in local. It includes user login. Users are able to created lists, tasks, and events. Lists and tasks appear on the home page. All three types require dates and populate the calendar page. Tasks can also be exported to CSV.
 
 # Directions to run
